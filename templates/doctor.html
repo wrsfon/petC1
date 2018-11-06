@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--<link rel="stylesheet" href="doctor.css">-->
+    <!--<link rel="stylesheet" href="user.css">-->
+    <style>
+      * {box-sizing: border-box;}
+      body {
+          font-family: Arial;
+          padding: 10px;
+          background: #f1f1f1;
+      }
+      /* Header/Blog Title */
+      .header {
+          padding: 30px;
+          text-align: center;
+          background: white;
+      }
+      .header h1 {
+          font-size: 50px;
+      }
+      h2 {
+          font-size: 30px;
+      }
+      /* Style the top navigation bar */
+      .topnav {
+          overflow: hidden;
+          background-color: #333;
+      }
+      /* Style the topnav links */
+      .topnav a {
+          float: left;
+          display: block;
+          color: #f2f2f2;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+      }
+      /* Change color on hover */
+      .topnav a:hover {
+          background-color: #ddd;
+          color: black;
+      }
+      /* Create two unequal columns that floats next to each other */
+      /* Left column */
+      .leftcolumn {
+          float: left;
+          width: 30%;
+      }
+      /* Right column */
+      .rightcolumn {
+          float: left;
+          width: 70%;
+          background-color: #f1f1f1;
+          padding-left: 20px;
+      }
+      /* Create two unequal columns that floats next to each other */
+      .column {
+          float: left;
+          padding: 5px;
+      }
+      /* Left and right column */
+      .column.side {
+          width: 25%;
+      }
+      /* Middle column */
+      .column.middle {
+          width: 50%;
+      }
+      /* Add a card effect for articles */
+      .cardd {
+          background-color: white;
+          padding: 20px;
+          margin-top: 20px;
+      }
+      /* Clear floats after the columns */
+      .row:after {
+          content: "";
+          display: table;
+          clear: both;
+      }
+      /* Footer */
+      .footer {
+          padding: 20px;
+          text-align: center;
+          background: white;
+          margin-top: 20px;
+      }
+      /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+      @media screen and (max-width: 800px) {
+          .leftcolumn, .rightcolumn {
+              width: 100%;
+              padding: 0;
+          }
+      }
+      /* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+      @media screen and (max-width: 400px) {
+          .topnav a {
+              float: none;
+              width: 100%;
+          }
+      }
+      .petCard {
+          background-color: #ddd;
+          width: 100%;
+          padding: 10px;
+      }
+      .petCard:hover {
+        background-color: #eee;
+      }
+
+      table{
+        background-color: #eee;
+        border-color: #000000;
+        border-spacing: 3px;
+        text-align: center;
+      }
+
+      th{
+        height: 50px;
+        background-color: #ddd;
+        font-size: 17px;
+      }
+
+      tr{
+        height: 40px;
+      }
+
+      tr:hover{
+        background-color: #fdfefe;
+      }
+      /* Add a card effect for articles */
+      .card {
+          width: 100%;
+          background-color: white;
+          padding: 20px;
+          margin-top: 20px;
+      }
+      /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+      @media screen and (max-width: 800px) {
+         .column.side, .column.middle {
+              width: 100%;
+          }
+      }
+      .task {
+          background-color: #ddd;
+          width: 100%;
+          padding: 10px;
+          min-height: 80px;
+      }
+      .task:hover {
+        background-color: #eee;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="header">
+      <h1>Pet Clinic</h1>
+    </div>
+
+    <div class="topnav">
+      <a href="{% url 'index' %}" style="float:right">Logout</a>
+    </div>
+
+    <div class="row">
+      <div class="column side"></div>
+      <div class="column middle" id="queue">
+        <div class="card" style="text-align:center">
+          <!-- show name Vet -->
+          <h3>DR. [[firstName]] [[lastName]]</h3>
+        </div>
+        <div class="card">
+          <h2>To Do</h2>
+          <!-- list of policingQ -->
+          <div v-for="list in listQ">
+            <div class="task" @click="openDialog(list)">
+              <h3>[[list.task]] Task</h3>
+              <el-row>
+                <el-col :span="10">
+                  Pet Name: [[list.petName]]<br>
+                </el-col>
+                <el-col :span="8">
+                  Type: [[list.type]]<br>
+                </el-col>
+                <el-col :span="6">
+                  Breed: [[list.breed]]<br>
+                </el-col>
+              </el-row>
+            </div><br>
+            <!-- dialog show all data -->
+            <el-dialog :visible.sync="dialogFormVisible" width=70%>
+              <h2>Pet Information</h2>
+              <el-row>
+                <el-col :span="12">
+                  <p style="font-size:17px">
+                    Pet Name: [[listQ[selectedIndex].petName]]<br><br>
+                    Breed: [[listQ[selectedIndex].breed]]<br><br>
+                    Weight: [[listQ[selectedIndex].weight]]<br><br>
+                    Heart Rate [[listQ[selectedIndex].heartRate]]
+                  </p>
+                </el-col>
+                <el-col :span="12">
+                  <p style="font-size:17px">
+                    Type: [[listQ[selectedIndex].type]]<br><br>
+                    Age: [[listQ[selectedIndex].age]]<br><br>
+                    Dehydration: [[listQ[selectedIndex].dehydration]]<br><br>
+                    Rest Rate: [[listQ[selectedIndex].restRate]]
+                  </p>
+                </el-col>
+              </el-row><hr>
+              <!-- show medicalRec for medical task -->
+              <el-form :model="medicalForm" label-width="25%" v-if="listQ[selectedIndex].task === 'Medical'">
+                <h2>Medical Record</h2>
+                <el-table :data="medicalRec" :default-sort = "{prop: 'date', order: 'descending'}" height=250 size="small">
+                  <el-table-column property="date" label="Date" width="150"></el-table-column>
+                  <el-table-column property="age" label="Age" width="100"></el-table-column>
+                  <el-table-column property="symptom" label="Symptom" width="200"></el-table-column>
+                  <el-table-column property="medicine" label="Medicine" width="200"></el-table-column>
+                  <el-table-column property="notation" label="Notation" width="200"></el-table-column>
+                  <el-table-column property="vet" label="Veterinarian" width="200"></el-table-column>
+                </el-table>
+                <el-row>
+                  <hr><br>
+                  <el-col :span="11">
+                    <el-form-item label="Symptom">
+                      <el-input v-model="medicalForm.symptom"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="13">
+                    <el-form-item label="Medicine">
+                      <el-input v-model="medicalForm.medicine"></el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-form-item label="Notation" label-width="11%">
+                  <el-input type="textarea" :rows="3" v-model="medicalForm.notation"></el-input>
+                </el-form-item>
+                <el-checkbox-group v-model="appointment" fill="#909497">
+                  <el-checkbox-button label="Make Appointment"></el-checkbox-button>
+                </el-checkbox-group>
+              </el-form>
+
+              <!-- show vaccinelRec for vaccine task -->
+              <el-form :model="vaccineForm" label-width="25%" v-if="listQ[selectedIndex].task === 'Vaccine'">
+                <h2>Vaccine Record</h2>
+                <el-table :data="vaccineRec" :default-sort = "{prop: 'date', order: 'descending'}" height=250 size="small">
+                  <el-table-column property="givenDate" label="Given Date" width="150"></el-table-column>
+                  <el-table-column property="age" label="Age" width="100"></el-table-column>
+                  <el-table-column property="immunization" label="Immunization" width="200"></el-table-column>
+                  <el-table-column property="vaccine" label="Vaccine" width="200"></el-table-column>
+                  <el-table-column property="dose" label="Dose" width="100"></el-table-column>
+                  <el-table-column property="nextDue" label="Next Due" width="150"></el-table-column>
+                  <el-table-column property="vet" label="Veterinarian" width="200"></el-table-column>
+                </el-table>
+                <el-row>
+                  <hr><br>
+                  <el-col :span="11">
+                    <el-form-item label="Immunization">
+                      <el-input v-model="vaccineForm.immunization"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="13">
+                    <el-form-item label="Vaccine">
+                      <el-input v-model="vaccineForm.vaccine"></el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="11">
+                    <el-form-item label="Dose">
+                      <el-input v-model="vaccineForm.dose"></el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="11">
+                    <el-form-item label="Next Due">
+                      <el-date-picker
+                        v-model="vaccineForm.nextDue"
+                        type="date"
+                        format="dd/MM/yyyy"
+                        placeholder="Pick a day">
+                      </el-date-picker>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="13">
+                    <el-form-item label="Time">
+                      <el-time-select
+                        v-model="vaccineForm.nextTime"
+                        :picker-options="{
+                          start: '08:30',
+                          step: '00:30',
+                          end: '19:30' }"
+                        placeholder="Select time">
+                      </el-time-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-form-item label="Description" label-width="11%">
+                  <el-input type="textarea" :rows="3" v-model="vaccineForm.description"></el-input>
+                </el-form-item>
+              </el-form>
+
+              <!-- appointment button for medical task -->
+              <span v-if="appointment">
+                <br><hr>
+                <el-form :model="appointmentForm" label-width="25%" v-if="listQ[selectedIndex].task === 'Medical'">
+                  <el-row>
+                    <el-col :span="11">
+                      <el-form-item label="Day">
+                        <el-date-picker v-model="appointmentForm.date" type="date"
+                        format="dd/MM/yyyy" placeholder="Pick a day"></el-date-picker>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="13">
+                      <el-form-item label="Time">
+                        <el-time-select
+                          v-model="appointmentForm.time"
+                          :picker-options="{
+                            start: '08:30',
+                            step: '00:30',
+                            end: '19:30' }"
+                          placeholder="Select time">
+                        </el-time-select>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                  <el-form-item label="Description" label-width="11%">
+                    <el-input type="textarea" :rows="3" v-model="appointmentForm.description"></el-input>
+                  </el-form-item>
+                </el-form>
+              </span>
+              <span slot="footer" class="dialog-footer">
+                <el-button type="info" plain @click="submit()">Confirm</el-button>
+                <el-button type="info" plain @click="discard()">Cancel</el-button>
+              </span>
+            </el-dialog>
+          </div>
+        </div>
+      </div>
+      <div class="column side"></div>
+    </div>
+
+  </body>
+    <!-- import Vue before Element -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!--<script src="doctorjs.js" charset="utf-8"></script>-->
+    <script>
+      new Vue({
+      el:"#queue",
+      data: {
+        firstName:'SETTAKARN',
+        lastName:'KLADKANSAENG',
+        listQ:[
+          { petName:'Memi',
+            type:'Cat',
+            breed:'pitbull',
+            age:'2y6m',
+            weight:6,
+            heartRate:56,
+            restRate:23,
+            dehydration:'yes',
+            task:'Vaccine' },
+          { petName:'Huli',
+            type:'Cat',
+            breed:'siamese',
+            age:'8m',
+            weight:8,
+            heartRate:96,
+            restRate:52,
+            dehydration:'no',
+            task:'Medical' }
+        ],
+        dialogFormVisible:false,
+        appointment:false,
+        medicalForm:{
+          symptom:'',
+          medicine:'',
+          notation:''
+        },
+        vaccineForm:{
+          immunization:'',
+          vaccine:'',
+          dose:'',
+          nextDue:'',
+          nextTime:'',
+          description:''
+        },
+        vaccineRec:[{
+          givenDate:'',
+          age:'',
+          immunization:'',
+          vaccine:'',
+          dose:'',
+          nextDue:'',
+          vet:''
+        }],
+        medicalRec: [{
+          date:'',
+          age:'',
+          symptom:'',
+          medicine:'',
+          notation:'',
+          vet:''
+        }],
+        appointmentForm:{
+          date:'',
+          time:'',
+          description:''
+        },
+        selectedIndex:0
+      },
+      methods: {
+          openDialog(x) {
+            this.selectedIndex = this.listQ.indexOf(x);
+            this.dialogFormVisible = true;
+            this.appointment = false;
+          },
+          submit() {
+            this.dialogFormVisible = false;
+            if (this.appointment) {
+              this.appointment = false;
+              var date = new Date(this.appointmentForm.date);
+              // data to create Appointment
+              console.log('Asend'+date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear(),
+              this.appointmentForm.time,this.listQ[this.selectedIndex].petName,this.appointmentForm.description);
+              this.appointmentForm.date = '';
+              this.appointmentForm.time = '';
+              this.appointmentForm.description = '';
+            }
+            if (this.listQ[this.selectedIndex].task == 'Medical') {
+              var today = new Date();
+              // data to create MedicalRec
+              console.log('MRsend'+today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear(),
+              this.listQ[this.selectedIndex].age,this.medicalForm.symptom,this.medicalForm.medicine,
+              this.medicalForm.notation,this.firstName,this.lastName);
+              this.medicalForm.symptom = '';
+              this.medicalForm.medicine = '';
+              this.medicalForm.notation = '';
+            }
+            else if (this.listQ[this.selectedIndex].task == 'Vaccine') {
+              var today = new Date();
+              var date = new Date(this.vaccineForm.nextDue);
+              // data to create VaccineRec
+              console.log('VRsend'+today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear(),
+              this.listQ[this.selectedIndex].age,this.vaccineForm.immunization,this.vaccineForm.vaccine,
+              this.vaccineForm.dose,date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear(),this.firstName,this.lastName);
+              console.log('Asend'+date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear(),this.vaccineForm.nextTime,
+              this.listQ[this.selectedIndex].petName,this.vaccineForm.description);
+              this.vaccineForm.immunization = '';
+              this.vaccineForm.vaccine = '';
+              this.vaccineForm.dose = '';
+              this.vaccineForm.nextDue = '';
+              this.vaccineForm.nextTime = '';
+              this.vaccineForm.description = '';
+            }
+          },
+          discard() {
+            this.dialogFormVisible = false;
+            this.appointment = false;
+            this.appointmentForm.date = '';
+            this.appointmentForm.time = '';
+            this.appointmentForm.description = '';
+            this.vaccineForm.immunization = '';
+            this.vaccineForm.vaccine = '';
+            this.vaccineForm.dose = '';
+            this.vaccineForm.nextDue = '';
+            this.vaccineForm.nextTime = '';
+            this.vaccineForm.description = '';
+            this.medicalForm.symptom = '';
+            this.medicalForm.medicine = '';
+            this.medicalForm.notation = '';
+          }
+        },
+        delimiters: ['[[', ']]']
+    });
+    </script>
+</html>

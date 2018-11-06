@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- <META HTTP-EQUIV="Refresh" CONTENT="0;URL=http://www.petClinic.com"> -->
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--<link rel="stylesheet" href="{ % static 'user.css' % }">-->
+      <style>
+        * {box-sizing: border-box;}
+        body {
+            font-family: Arial;
+            padding: 10px;
+            background: #f1f1f1;
+        }
+        /* Header/Blog Title */
+        .header {
+            padding: 30px;
+            text-align: center;
+            background: white;
+        }
+        .header h1 {
+            font-size: 50px;
+        }
+        h2 {
+            font-size: 30px;
+        }
+        /* Style the top navigation bar */
+        .topnav {
+            overflow: hidden;
+            background-color: #333;
+        }
+        /* Style the topnav links */
+        .topnav a {
+            float: left;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        /* Change color on hover */
+        .topnav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        /* Create two unequal columns that floats next to each other */
+        /* Left column */
+        .leftcolumn {
+            float: left;
+            width: 30%;
+        }
+        /* Right column */
+        .rightcolumn {
+            float: left;
+            width: 70%;
+            background-color: #f1f1f1;
+            padding-left: 20px;
+        }
+        /* Create two unequal columns that floats next to each other */
+        .column {
+            float: left;
+            padding: 5px;
+        }
+        /* Left and right column */
+        .column.side {
+            width: 25%;
+        }
+        /* Middle column */
+        .column.middle {
+            width: 50%;
+        }
+        /* Add a card effect for articles */
+        .cardd {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        /* Footer */
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: white;
+            margin-top: 20px;
+        }
+        /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+        @media screen and (max-width: 800px) {
+            .leftcolumn, .rightcolumn {
+                width: 100%;
+                padding: 0;
+            }
+        }
+        /* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+        @media screen and (max-width: 400px) {
+            .topnav a {
+                float: none;
+                width: 100%;
+            }
+        }
+        .petCard {
+            background-color: #ddd;
+            width: 100%;
+            padding: 10px;
+        }
+        .petCard:hover {
+          background-color: #eee;
+        }
+
+        table{
+          background-color: #eee;
+          border-color: #000000;
+          border-spacing: 3px;
+          text-align: center;
+        }
+
+        th{
+          height: 50px;
+          background-color: #ddd;
+          font-size: 17px;
+        }
+
+        tr{
+          height: 40px;
+        }
+
+        tr:hover{
+          background-color: #fdfefe;
+        }
+        </style>
+  </head>
+
+  <body>
+
+    <div class="header">
+      <h1>Pet Clinic</h1>
+    </div>
+
+    <div class="topnav">
+      <!-- <a href="#">Link</a>
+      <a href="#">Link</a>
+      <a href="#">Link</a> -->
+      <a href="{% url 'index' %}" style="float:right">Logout</a>
+    </div>
+
+    <div class="row">
+      <div class="leftcolumn">
+        <!-- Profile User Card -->
+        <div class="cardd" id="userProfile">
+          <!-- user information -->
+          <h2>Profile</h2>
+          <p>Name: {{name}} {{surname}}</p>
+          <p>Tel: {{tel}}</p>
+          <p>Email: {{email}}</p>
+          <!--<p>Name: [[name]] [[surname]]</p>-->
+          <!--<p>Tel: [[tel]]</p>-->
+          <!--<p>Email: [[email]]</p>-->
+          <template>
+            <el-button type="text" style="margin-left:75%; color:#797D7F;" @click="openDialog">Edit Profile</el-button>
+          </template>
+          <!-- pop-up for edit profile -->
+          <el-dialog title="Edit Profile" :visible.sync="dialogFormVisible">
+            <el-form :model="form" label-width="15%">
+              <el-form-item label="First Name">
+                <el-input v-model="form.firstName" name="editFirstName"></el-input>
+              </el-form-item>
+              <el-form-item label="Last Name">
+                <el-input v-model="form.lastName" name="editLastName"></el-input>
+              </el-form-item>
+              <el-form-item label="Tel">
+                <el-input v-model="form.telNo" name="editTel"></el-input>
+              </el-form-item>
+              <el-form-item label="Email">
+                <el-input v-model="form.emailAddr" name="editEmail"></el-input>
+              </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+              <el-button type="info" plain @click="changeProfile()">Confirm</el-button>
+              <el-button type="info" plain @click="dialogFormVisible = false">Cancel</el-button>
+            </span>
+          </el-dialog>
+        </div>
+
+        <!-- Pet List Card -->
+        <div class="cardd" id="petList">
+          <h2>Pets</h2>
+          <!-- loop show all pet in listPet -->
+          <div v-for="list in listPet">
+            <!-- watch each pet information, medical record and vaccine record -->
+            <div class="petCard" style="height:80px;" @click="openPetDialog(list)">
+              <!-- each pet information -->
+              <el-row>
+                <el-col :span="15">
+                  Pet Name: [[list.petName]]<br>
+                  Date of Birth: [[list.birthDate]]<br>
+                  Breed: [[list.breed]]
+                </el-col>
+                <el-col :span="9">
+                  Type: [[list.type]]<br>
+                  Age: [[list.age]]<br>
+                  Sickness: [[list.sick]]
+                </el-col>
+              </el-row>
+            </div>
+            <span>
+              <!-- pop-up show selected pet information, medical record and vaccine record -->
+              <el-dialog :visible.sync="petDialogVisible" width=70%>
+                <hr><h2>Pet Information</h2>
+                <el-row>
+                  <el-col :span="11">
+                    <p style="font-size:18px">
+                      Pet Name: [[listPet[selectedIndex].petName]]<br><br>
+                      Date of Birth: [[listPet[selectedIndex].birthDate]]<br><br>
+                      Breed: [[listPet[selectedIndex].breed]]
+                    </p>
+                  </el-col>
+                  <el-col :span="13">
+                    <p style="font-size:18px">
+                      Type: [[listPet[selectedIndex].type]]<br><br>
+                      Age: [[listPet[selectedIndex].age]]<br><br>
+                      Sickness: [[listPet[selectedIndex].sick]]
+                      <!-- edit pet information button -->
+                      <el-button type="info" plain style="float:right" @click="openEditForm()">Edit</el-button>
+                    </p>
+                  </el-col>
+                </el-row><hr>
+                <!-- edit button is pressed -->
+                <div v-if="editPetInfo === true">
+                  <!-- edit pet information form -->
+                  <el-form :model="editPetForm" label-width="15%">
+                    <el-row>
+                      <el-col :span="10">
+                        <el-form-item label="Pet Name" label-width="36%">
+                          <el-input v-model="editPetForm.petName"></el-input>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item label="Breed" label-width="42%">
+                          <el-input v-model="editPetForm.breed"></el-input>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-form-item label="Date of Birth">
+                      <el-date-picker type="date" v-model="editPetForm.birthDate"
+                      format="dd/MM/yyyy" placeholder="Select date"></el-date-picker>
+                    </el-form-item>
+                  </el-form>
+                  <!-- delete pet from listPet !!!!Not Finish!!!!-->
+                  <el-button type="info" plain style="float:left" @click="deletePet()">Delete</el-button>
+                  <el-button type="info" plain style="float:right" @click="editPetInfo = false">Cancel</el-button>
+                  <!-- save changes -->
+                  <el-button type="info" plain style="float:right" @click="changePetInfo()">Save</el-button>
+                  <br><br>
+                </div>
+                <div>
+                  <!-- show medical record table -->
+                  <h2>Medical Record</h2>
+                  <el-table :data="medicalRec" :default-sort = "{prop: 'date', order: 'descending'}" height=250 size="small">
+                    <el-table-column property="date" label="Date" width="150"></el-table-column>
+                    <el-table-column property="age" label="Age" width="100"></el-table-column>
+                    <el-table-column property="symptom" label="Symptom" width="200"></el-table-column>
+                    <el-table-column property="medicine" label="Medicine" width="200"></el-table-column>
+                    <el-table-column property="notation" label="Notation" width="200"></el-table-column>
+                    <el-table-column property="vet" label="Veterinarian" width="200"></el-table-column>
+                  </el-table>
+                  <!-- show vaccine record table -->
+                  <h2>Vaccine Record</h2>
+                  <el-table :data="vaccineRec" :default-sort = "{prop: 'date', order: 'descending'}" height=250 size="small">
+                    <el-table-column property="givenDate" label="Given Date" width="150"></el-table-column>
+                    <el-table-column property="age" label="Age" width="100"></el-table-column>
+                    <el-table-column property="immunization" label="Immunization" width="200"></el-table-column>
+                    <el-table-column property="vaccine" label="Vaccine" width="200"></el-table-column>
+                    <el-table-column property="dose" label="Dose" width="100"></el-table-column>
+                    <el-table-column property="nextDue" label="Next Due" width="150"></el-table-column>
+                    <el-table-column property="vet" label="Veterinarian" width="200"></el-table-column>
+                  </el-table>
+                </div>
+
+                <!-- input email to send all information !!!!Not Finish!!!!-->
+                <span slot="footer" class="dialog-footer" style="float:middle">
+                  <el-form :model="editPetForm" label-width="40%">
+                  <el-row>
+                    <el-col :span="16">
+                      <el-form-item label="Send to Email:">
+                        <el-input></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="4">
+                      <!-- send button !!!!Not Finish!!!!-->
+                      <el-button type="info" plain>Send</el-button>
+                    </el-col>
+                  </el-row>
+                </span>
+              </el-dialog>
+            </span>
+            <br>
+          </div>
+          <!-- show all pet information, medical record and vaccine record !!!!Not Finish!!!!-->
+          <el-button type="text" style="margin-left:80%; color:#797D7F;" @click="allPetDialogVisible = true">Watch All</el-button>
+          <el-dialog :visible.sync="allPetDialogVisible" width=70%>
+            <div v-for="listt in listPet">
+              <hr><h2>Pet Information</h2>
+              <el-row>
+                <el-col :span="11">
+                  <p style="font-size:18px">
+                    Pet Name: [[listt.petName]]<br><br>
+                    Date of Birth: [[listt.birthDate]]<br><br>
+                    Breed: [[listt.breed]]
+                  </p>
+                </el-col>
+                <el-col :span="13">
+                  <p style="font-size:18px">
+                    Type: [[listt.type]]<br><br>
+                    Age: [[listt.age]]<br><br>
+                    Sickness: [[listt.sick]]
+                    <!-- edit pet information button -->
+                    <!-- <el-button type="info" plain style="float:right" @click="openEditForm()">Edit</el-button> -->
+                  </p>
+                </el-col>
+              </el-row><hr>
+              <!-- edit button is pressed -->
+              <div v-if="editPetInfo === true">
+                <!-- edit pet information form -->
+                <el-form :model="editPetForm" label-width="15%">
+                  <el-row>
+                    <el-col :span="10">
+                      <el-form-item label="Pet Name" label-width="36%">
+                        <el-input v-model="editPetForm.petName"></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="Breed" label-width="42%">
+                        <el-input v-model="editPetForm.breed"></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                  <el-form-item label="Date of Birth">
+                    <el-date-picker type="date" v-model="editPetForm.date"
+                    format="dd/MM/yyyy" placeholder="Select date"></el-date-picker>
+                  </el-form-item>
+                </el-form>
+                <!-- delete pet from listPet !!!!Not Finish!!!!-->
+                <el-button type="info" plain style="float:left" @click="deletePet()">Delete</el-button>
+                <el-button type="info" plain style="float:right" @click="editPetInfo = false">Cancel</el-button>
+                <!-- save changes -->
+                <el-button type="info" plain style="float:right" @click="changePetInfo()">Save</el-button>
+                <br><br>
+              </div>
+              <div>
+                <!-- show medical record table -->
+                <h2>Medical Record</h2>
+                <el-table :data="medicalRec" :default-sort = "{prop: 'date', order: 'descending'}" height=250 size="small">
+                  <el-table-column property="date" label="Date" width="150"></el-table-column>
+                  <el-table-column property="age" label="Age" width="100"></el-table-column>
+                  <el-table-column property="symptom" label="Symptom" width="200"></el-table-column>
+                  <el-table-column property="medicine" label="Medicine" width="200"></el-table-column>
+                  <el-table-column property="notation" label="Notation" width="200"></el-table-column>
+                  <el-table-column property="vet" label="Veterinarian" width="200"></el-table-column>
+                </el-table>
+                <!-- show vaccine record table -->
+                <h2>Vaccine Record</h2>
+                <el-table :data="vaccineRec" :default-sort = "{prop: 'date', order: 'descending'}" height=250 size="small">
+                  <el-table-column property="givenDate" label="Given Date" width="150"></el-table-column>
+                  <el-table-column property="age" label="Age" width="100"></el-table-column>
+                  <el-table-column property="immunization" label="Immunization" width="200"></el-table-column>
+                  <el-table-column property="vaccine" label="Vaccine" width="200"></el-table-column>
+                  <el-table-column property="dose" label="Dose" width="100"></el-table-column>
+                  <el-table-column property="nextDue" label="Next Due" width="150"></el-table-column>
+                  <el-table-column property="vet" label="Veterinarian" width="200"></el-table-column>
+                </el-table>
+              </div>
+            </div>
+            <!-- input email to send all information !!!!Not Finish!!!!-->
+            <span slot="footer" class="dialog-footer" style="float:middle">
+              <el-form :model="editPetForm" label-width="40%">
+              <el-row>
+                <el-col :span="16">
+                  <el-form-item label="Send to Email:">
+                    <el-input></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                  <!-- send button !!!!Not Finish!!!!-->
+                  <el-button type="info" plain>Send</el-button>
+                </el-col>
+              </el-row>
+            </span>
+          </el-dialog>
+        </div>
+      </div>
+
+      <div class="rightcolumn">
+        <!-- Appointment Table Card -->
+        <div class="cardd" id="appointment">
+          <h2>Appointment</h2>
+          <table style="width:100%">
+            <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Pet</th>
+            <th>Description</th>
+          </tr>
+          <tr v-for="alist in appointmentList">
+            <td>[[alist.date]]</td>
+            <td>[[alist.time]]</td>
+            <td>[[alist.pet]]</td>
+            <td>[[alist.description]]</td>
+          </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js" charset="utf-8"></script>
+    <!-- import Vue before Element -->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!--<script type="text/javascript" src="{ % static 'userjs.js' % }" charset="utf-8"></script>-->
+    <script>
+        new Vue({
+          el:"#userProfile",
+          data:{
+            // user information
+            name:'Warisa',
+            surname:'Saisema',
+            tel:'0806922292',
+            email:'wariffon@gmail.com',
+            // show pop-up for edit profile
+            dialogFormVisible:false,
+            // form edit profile
+            form: {
+              firstName:'',
+              lastName:'',
+              telNo:'',
+              emailAddr:''
+            }
+          },
+          methods:{
+            openDialog() {
+              // show pop-up
+              this.dialogFormVisible = true;
+              // set default value on input bar
+              this.form.firstName = this.name;
+              this.form.lastName = this.surname;
+              this.form.telNo = this.tel;
+              this.form.emailAddr = this.email;
+            },
+            changeProfile() {
+              //axios
+              //  .get('http://localhost:8000/user/summit')
+              //  .then(response => {
+              //    this.name = response.name
+              //    console.log('great!');
+              //  })
+              // save changes
+              this.dialogFormVisible = false;
+              this.name = this.form.firstName;
+              this.surname = this.form.lastName;
+              this.tel = this.form.telNo;
+              this.email = this.form.emailAddr;
+            }
+          },
+          delimiters: ['[[', ']]']
+        });
+
+        new Vue({
+          el:"#petList",
+          data:{
+            // list of pet information
+            listPet:[
+              { petName:'Memi',
+                type:'Cat',
+                birthDate:'20/10/2000',
+                age:'18y1m',
+                breed:'unknown',
+                sick:'-' },
+              { petName:'Huli',
+                type:'Cat',
+                age:'4y3m',
+                birthDate:'5/8/2014',
+                breed:'unknown',
+                sick:'-' }
+            ],
+            selectedIndex:0,
+            // show pop-up for each pet information, medical record and vaccine record
+            petDialogVisible:false,
+            allPetDialogVisible:false,
+            // show edit form
+            editPetInfo:false,
+            // form edit name, breed and date of birth of pet
+            editPetForm:{
+              petName:'',
+              breed:'',
+              birthDate:''
+            },
+            // data which showed in medical record table
+            medicalRec: [{
+              date:'',
+              age:'',
+              symptom:'',
+              medicine:'',
+              notation:'',
+              vet:''
+            }],
+            // data which showed in vaccine record table
+            vaccineRec:[{
+              givenDate:'',
+              age:'',
+              immunization:'',
+              vaccine:'',
+              dose:'',
+              nextDue:'',
+              vet:''
+            }]
+          },
+          methods:{
+            openPetDialog(x) {
+              // show pop-up
+              this.petDialogVisible = true;
+              this.editPetInfo = false;
+              // x is obj to find which index of pet is selected
+              this.selectedIndex = this.listPet.indexOf(x);
+            },
+            openEditForm() {
+              this.editPetInfo = !this.editPetInfo;
+              this.editPetForm.petName = this.listPet[this.selectedIndex].petName;
+              this.editPetForm.breed = this.listPet[this.selectedIndex].breed;
+              var date = this.listPet[this.selectedIndex].birthDate.split("/");
+              this.editPetForm.birthDate = new Date(date[2],date[1]-1,date[0]);
+            },
+            deletePet() {
+              console.log(this.selectedIndex,this.listPet[this.selectedIndex].petName);
+              // this.listPet.pop(this.selectedIndex);
+              // document.getElementById("petList").reload(true); // maybe work with front-back
+              this.editPetInfo = false;
+              this.petDialogVisible = false;
+              // show meg
+              this.$message({
+                message: 'Pet Deleted',
+                type: 'error',
+                center: true
+              });
+            },
+            changePetInfo() {
+              // close edit form
+              this.editPetInfo = false;
+              // change information
+              this.listPet[this.selectedIndex].petName = this.editPetForm.petName;
+              this.listPet[this.selectedIndex].breed = this.editPetForm.breed;
+              var date = new Date(this.editPetForm.birthDate);
+              this.listPet[this.selectedIndex].birthDate = date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear();
+              this.listPet[this.selectedIndex].age = this.computeAge(this.listPet[this.selectedIndex].birthDate);
+              // show meg
+              this.$message({
+                message: 'Changes Saved',
+                type: 'success',
+                center: true
+              });
+
+            },
+            computeAge(bd) {
+              var t = bd.split("/");
+              var bdate = new Date(t[2],t[1],t[0]);
+              var today = new Date();
+              var str = '';
+              var year = today.getFullYear() - bdate.getFullYear();
+              var month = today.getMonth()+1 - bdate.getMonth();
+              var day = today.getDate() - bdate.getDate();
+              if (month<0 || (month==0 && day<0))  year--;
+              if (year==0 && month<5) var week = month*4;
+              if (year ==0) {
+                if (month<5) str = week+'weeks';
+                else str = month+'m';
+              }
+              else {
+                if (month==0) str = year+'y';
+                else str = year+'y'+month+'m';
+              }
+              return str;
+            }
+          },
+          delimiters: ['[[', ']]']
+        });
+
+        new Vue({
+          el:"#appointment",
+          // data which showed in appointment table
+          data:{
+            appointmentList:[{
+              date:'18/10/2019',
+              time:'10:00',
+              pet:'Memi',
+              description:'check'
+            }, {
+              date:'18/10/2019',
+              time:'14:00',
+              pet:'Huli',
+              description:'check'
+            }]
+          },
+          delimiters: ['[[', ']]']
+        });
+    </script>
+</html>
